@@ -70,72 +70,9 @@ it REALLY goes FAHH.
 
 ---
 
-## 📸 instagram content ideas
 
-*(steal these. seriously. go off.)*
 
----
 
-### 🔥 post 1 — the reveal
-**caption:**
-> bro i made a game in one night 💀 flap the chicken. dodge the pipes. try not to cry. link in bio 🐔🎮
-> 
-> #gamedev #indiegame #flappybird #chicken #fahh #buildinpublic #htmlcss #javascript #devlife #coding
-
----
-
-### 😭 post 2 — the relatable fail
-> record yourself dying at score 1 within 0.3 seconds
-
-**caption:**
-> me: i'm built different 🗿  
-> the pipes:  
-> [clip of immediate death]  
-> 
-> score: 0. respect: 0. going again: yes.  
-> 
-> #fail #gamedev #flappyfahh #skill issue #tryagain
-
----
-
-### 🎯 post 3 — the flex
-> screen record when you get a high score (like 12+)
-
-**caption:**
-> they said it couldn't be done. they were mostly right. 
-> 
-> 🐔 SCORE: [your score] 🐔  
-> flappy fahh is now live. come embarrass yourself 💀  
-> 
-> #highscore #flappyfahh #gamer #nolife #proudofmyself
-
----
-
-### 👀 post 4 — the mystery tease
-> just show the game with no context. no caption. just the chicken going FAHH.
-
-**caption:**
-> .
-
-*(yes literally just a dot. the algorithm will be confused. so will your followers. perfect.)*
-
----
-
-### 😤 post 5 — the spicy take
-**caption:**
-> flappy bird was cute.  
-> flappy fahh is a warning.  
-> 
-> built this from scratch. no unity. no godot. just html, javascript, and a concerning amount of free time.  
-> 
-> 🐔 it goes fahh when it flies. that's all you need to know.  
-> 
-> #buildinpublic #gamedev #solodev #javascript #webdev #indiegame #chickengame
-
----
-
-### 🛠️ post 6 — the dev flex
-> show the code editor next to the game
 
 **caption:**
 > 582 lines of javascript.  
