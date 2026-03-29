@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flappy Fahh 🐔</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0a1a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Outfit', sans-serif;
+      color: #fff;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Animated starfield background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(120, 40, 200, 0.15) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(40, 100, 220, 0.15) 0%, transparent 60%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #f9ca24 0%, #f0932b 50%, #ff6b6b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    #controls {
+      font-size: 0.82rem;
+      color: #8899bb;
+      margin-bottom: 16px;
+      text-align: center;
+      line-height: 2;
+      position: relative;
+      z-index: 1;
+    }
+
+    #controls kbd {
+      display: inline-block;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 5px;
+      padding: 1px 8px;
+      color: #f9ca24;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+
+    #canvasWrapper {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 2px rgba(249, 202, 36, 0.3),
+        0 0 40px rgba(249, 202, 36, 0.2),
+        0 0 80px rgba(240, 147, 43, 0.1),
+        0 40px 80px rgba(0, 0, 0, 0.6);
+      position: relative;
+      z-index: 1;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    /* HUD overlays inside canvas wrapper */
+    #gravityIndicator {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(0,0,0,0.55);
+      border: 1.5px solid rgba(255,255,255,0.2);
+      transition: color 0.3s ease, border-color 0.3s ease;
+      pointer-events: none;
+      letter-spacing: 1px;
+    }
+
+    #gravityIndicator.normal {
+      color: #4ecca3;
+      border-color: rgba(78,204,163,0.5);
+    }
+
+    #gravityIndicator.inverted {
+      color: #ff6b6b;
+      border-color: rgba(255,107,107,0.5);
+    }
+
+    #scoreEl {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f9ca24;
+      pointer-events: none;
+      text-shadow: 0 0 12px rgba(249,202,36,0.6);
+    }
+
+    /* Game overlay (start / game-over) */
+    #gameOverlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(6px);
+      opacity: 1;
+      pointer-events: auto;
+      transition: opacity 0.35s ease;
+    }
+
+    #gameOverlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #overlayTitle {
+      font-size: 2.8rem;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    #overlayTitle.dead {
+      color: #ff6b6b;
+      animation: shake 0.4s ease;
+    }
+
+    #overlayTitle.start {
+      background: linear-gradient(135deg, #f9ca24, #f0932b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    #overlayScore {
+      font-size: 1.1rem;
+      color: #ccc;
+      font-weight: 400;
+    }
+
+    #overlayBest {
+      font-size: 0.85rem;
+      color: #8899bb;
+    }
+
+    #overlayHint {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.45);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🐔 FLAPPY FAHH</h1>
+
+  <div id="controls">
+    <kbd>SPACE</kbd> Flap &nbsp;|&nbsp; <kbd>SHIFT</kbd> Flip Gravity
+  </div>
+
+  <div id="canvasWrapper">
+    <canvas id="gameCanvas" width="460" height="580"></canvas>
+
+    <div id="gravityIndicator" class="normal">⬇ NORMAL</div>
+    <div id="scoreEl">Score: 0</div>
+
+    <div id="gameOverlay">
+      <div id="overlayTitle" class="start">🐔 FLAPPY FAHH</div>
+      <div id="overlayScore"></div>
+      <div id="overlayBest"></div>
+      <div id="overlayHint">Press SPACE or tap to start</div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
