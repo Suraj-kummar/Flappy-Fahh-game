@@ -70,7 +70,7 @@ function playDie() {
     osc.start(audioCtx.currentTime);
     osc.stop(audioCtx.currentTime + 0.45);
   } catch (_) {}
-}
+} 
 
 // ── Game constants ────────────────────────────────────────
 const GRAVITY_NORMAL   =  0.45;   // px / frame²  downward
