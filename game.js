@@ -156,3 +156,22 @@ function showAchievementToast(id) {
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 3000);
 }
+
+// ── Leaderboard ─────────────────────────────────────────────
+function getLeaderboard() { return JSON.parse(localStorage.getItem("fahh_leaderboard") || "[]"); }
+function saveLeaderboard(lb) { localStorage.setItem("fahh_leaderboard", JSON.stringify(lb)); }
+function addToLeaderboard(name, score) {
+  const lb = getLeaderboard();
+  lb.push({ name, score }); lb.sort((a, b) => b.score - a.score); lb.splice(5);
+  saveLeaderboard(lb); return lb;
+}
+function renderLeaderboard() {
+  const lb = getLeaderboard();
+  if (!lb.length) { leaderboardList.innerHTML = '<div class="lb-empty">No scores yet — be the first!</div>'; return; }
+  leaderboardList.innerHTML = lb.map((e, i) =>
+    '<div class="lb-row ' + (i===0?'lb-gold':i===1?'lb-silver':i===2?'lb-bronze':'') + '">' +
+    '<span class="lb-rank">' + (["🥇","🥈","🥉","4","5"][i]) + '</span>' +
+    '<span class="lb-name">' + (e.name||"???") + '</span>' +
+    '<span class="lb-score">' + e.score + '</span></div>'
+  ).join("");
+}
