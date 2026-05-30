@@ -237,3 +237,18 @@ function updateGravityIndicator() {
 }
 function updateScore() { scoreEl.textContent = "Score: " + score; }
 function triggerShake(f, a) { shakeFrames = f; shakeAmount = a; }
+
+// ── Reset ──────────────────────────────────────────────────
+function resetGame() {
+  birdY = H / 2; birdVY = 0; gravitySign = 1; score = 0;
+  pipes = []; particles = []; coins = []; powerupItems = [];
+  frameCount = 0; pipeSpeed = PIPE_SPEED_INIT;
+  lives = MAX_LIVES; invincibleFrames = 0;
+  activePowerup = null; powerupTimer = 0; shieldHit = false;
+  combo = 0; comboActive = false; sessionCoins = 0;
+  doubleFlapped = false; doubleFlappedTimer = 0; gravityFlipCount = 0;
+  shakeFrames = 0; cloudOffset = 0; hillOffset = 0;
+  updateGravityIndicator(); updateScore();
+  updateHeartsDisplay(); updatePowerupDisplay();
+  updateCoinsDisplay(); updateComboDisplay();
+}
