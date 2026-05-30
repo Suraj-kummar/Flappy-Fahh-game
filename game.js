@@ -259,3 +259,14 @@ function startGame() {
   overlay.classList.add("hidden"); lbPanel.classList.add("hidden");
   startMusic(); unlockAchievement("first_flight");
 }
+
+function showStartScreen() {
+  state = "start";
+  overlayTitle.textContent = "🐔 FLAPPY FAHH"; overlayTitle.className = "start";
+  overlayScore.textContent = "";
+  overlayBest.textContent = bestScore > 0 ? "Best: " + bestScore : "";
+  overlayHint.textContent = "Press SPACE or tap to start";
+  overlayAchievements.innerHTML = ""; overlayLeaderboard.innerHTML = "";
+  if (shareBtn) shareBtn.style.display = "none";
+  overlay.classList.remove("hidden"); renderLeaderboard(); stopMusic();
+}
