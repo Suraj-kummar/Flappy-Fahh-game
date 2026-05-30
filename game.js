@@ -469,3 +469,18 @@ function drawHills() {
   for (let x = -hillOffset % hw; x < W + hw; x += hw * 0.5) ctx.quadraticCurveTo(x+hw*0.25, H-80, x+hw*0.5, H);
   ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
 }
+
+function drawPipe(p) {
+  const pb = ctx.createLinearGradient(p.x, 0, p.x+PIPE_WIDTH, 0);
+  if (gravitySign === 1) { pb.addColorStop(0,"#1b6b3a"); pb.addColorStop(0.4,"#2ecc71"); pb.addColorStop(1,"#145c30"); }
+  else { pb.addColorStop(0,"#6c1b6b"); pb.addColorStop(0.4,"#c0392b"); pb.addColorStop(1,"#5c1445"); }
+  const cH=20, cW=PIPE_WIDTH+10, cX=p.x-5;
+  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+  ctx.fillStyle=pb; rr(p.x,0,PIPE_WIDTH,p.topH-cH,0); ctx.fill();
+  ctx.fillStyle=gravitySign===1?"#27ae60":"#e74c3c"; rr(cX,p.topH-cH,cW,cH,6); ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,0.12)"; ctx.fillRect(p.x+6,0,8,p.topH);
+  ctx.fillStyle=pb; rr(p.x,p.bottomY+cH,PIPE_WIDTH,H-p.bottomY-cH,0); ctx.fill();
+  ctx.fillStyle=gravitySign===1?"#27ae60":"#e74c3c"; rr(cX,p.bottomY,cW,cH,6); ctx.fill();
+  ctx.fillStyle="rgba(255,255,255,0.12)"; ctx.fillRect(p.x+6,p.bottomY+cH,8,H);
+  if (p.moving) { ctx.strokeStyle="rgba(255,255,100,0.3)"; ctx.lineWidth=2; ctx.setLineDash([4,6]); ctx.beginPath(); ctx.moveTo(p.x+PIPE_WIDTH/2,p.topH+10); ctx.lineTo(p.x+PIPE_WIDTH/2,p.bottomY-10); ctx.stroke(); ctx.setLineDash([]); ctx.lineWidth=1; }
+}
