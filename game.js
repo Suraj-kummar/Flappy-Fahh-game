@@ -438,3 +438,19 @@ function update() {
   starOffset  = (starOffset  + pipeSpeed * 0.05) % W;
   if (shakeFrames > 0) { shakeFrames--; shakeAmount *= 0.88; }
 }
+
+// ── Draw ───────────────────────────────────────────────────
+const STAR_POS = [[30,40],[80,100],[140,25],[200,80],[270,35],[320,90],[380,55],[420,130],[55,200],[110,150],[175,220],[245,170],[310,240],[395,180],[440,70],[15,300],[90,280],[160,340],[230,295],[300,360],[370,315],[435,250],[20,430],[100,460],[170,400],[240,470],[310,420],[390,480],[450,395]];
+function drawBackground() {
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  const c = getSkyColors(score);
+  sky.addColorStop(0, c.top); sky.addColorStop(0.5, c.mid); sky.addColorStop(1, c.bottom);
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = "rgba(255,255,255,0.7)";
+  for (const [sx, sy] of STAR_POS) {
+    const sx2 = ((sx - starOffset % W) + W) % W;
+    const fl = 0.5 + 0.5 * Math.sin((frameCount + sx*3) * 0.04);
+    ctx.globalAlpha = 0.3 + fl * 0.5; ctx.fillRect(sx2, sy, 1.5, 1.5);
+  }
+  ctx.globalAlpha = 1;
+}
