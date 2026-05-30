@@ -331,3 +331,25 @@ window.addEventListener("keydown", (e) => {
 });
 canvas.addEventListener("pointerdown", (e) => { e.preventDefault(); handleFlap(); });
 if (lbToggleBtn) lbToggleBtn.addEventListener("click", () => { lbPanel.classList.toggle("hidden"); renderLeaderboard(); });
+
+// ── Spawning ───────────────────────────────────────────────
+function spawnPipeAndItems() {
+  const minTop = 50, maxTop = H - PIPE_GAP - 50;
+  const topH = Math.random() * (maxTop - minTop) + minTop;
+  const movingPipe = score > 15 && Math.random() < 0.5;
+  pipes.push({
+    x: W + PIPE_WIDTH, topH, bottomY: topH + PIPE_GAP, baseTopH: topH, scored: false,
+    moving: movingPipe, moveDir: Math.random() < 0.5 ? 1 : -1,
+    moveSpeed: 0.4 + Math.random() * 0.4, moveRange: 30 + Math.random() * 20,
+    movePhase: Math.random() * Math.PI * 2,
+  });
+  // Coin in gap
+  if (Math.random() < 0.6) {
+    coins.push({ x: W + PIPE_WIDTH + PIPE_SPAWN_DIST / 2, y: topH + PIPE_GAP / 2 + (Math.random() - 0.5) * (PIPE_GAP * 0.4), collected: false, r: 10, spinAngle: 0 });
+  }
+  // Power-up
+  if (Math.random() < 0.18) {
+    const types = ["shield", "slowmo", "magnet"];
+    powerupItems.push({ x: W + PIPE_WIDTH + 60, y: topH + PIPE_GAP / 2 + (Math.random() - 0.5) * 40, type: types[Math.floor(Math.random() * types.length)], collected: false, r: 14, bob: Math.random() * Math.PI * 2 });
+  }
+}
