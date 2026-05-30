@@ -544,3 +544,19 @@ function updateIdleBird() {
   if (idleBirdY > H/2 + 15) { idleBirdY = H/2+15; idleBirdVY = -2.8; }
   if (idleBirdY < H/2 - 15) { idleBirdY = H/2-15; idleBirdVY =  2.8; }
 }
+
+// ── Main Loop ──────────────────────────────────────────────
+function loop() {
+  frameCount++;
+  let sx = 0, sy = 0;
+  if (shakeFrames > 0) { sx = (Math.random()-0.5)*shakeAmount; sy = (Math.random()-0.5)*shakeAmount; }
+  ctx.save(); ctx.translate(sx, sy);
+  ctx.clearRect(-shakeAmount, -shakeAmount, W+shakeAmount*2, H+shakeAmount*2);
+  drawBackground(); drawClouds(); drawHills();
+  for (const p of pipes) drawPipe(p);
+  drawCoins(); drawPowerupItems(); drawParticles();
+  if (state === "playing" || state === "dead") { drawBird(); }
+  else { updateIdleBird(); const sv = birdY; birdY = idleBirdY; drawBird(); birdY = sv; }
+  drawBoundaries(); ctx.restore();
+  update(); requestAnimationFrame(loop);
+}
