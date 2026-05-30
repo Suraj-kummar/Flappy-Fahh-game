@@ -203,3 +203,37 @@ function getSkyColors(score) {
   if (phase < 0.75) { const t = (phase-0.5)/0.25; return {top:lerpColor("#0a4a8a","#1a0a2e",t),mid:lerpColor("#1265aa","#6b1a1a",t),bottom:lerpColor("#1e88e5","#e74c3c",t)}; }
   const t = (phase-0.75)/0.25; return {top:lerpColor("#1a0a2e","#03001a",t),mid:lerpColor("#6b1a1a","#0d0d2b",t),bottom:lerpColor("#e74c3c","#0f2460",t)};
 }
+
+// ── HUD Helpers ────────────────────────────────────────────
+function pipeSpeed_for(sc) {
+  return Math.min(PIPE_SPEED_INIT + sc * PIPE_SPEED_INC, PIPE_SPEED_MAX) * (activePowerup === "slowmo" ? 0.5 : 1);
+}
+function updateHeartsDisplay() {
+  if (!heartsEl) return; heartsEl.innerHTML = "";
+  for (let i = 0; i < MAX_LIVES; i++) { const h = document.createElement("span"); h.textContent = i < lives ? "❤️" : "🖤"; heartsEl.appendChild(h); }
+}
+function updatePowerupDisplay() {
+  if (!powerupEl || !powerupBar) return;
+  if (!activePowerup) { powerupEl.textContent = ""; powerupBar.style.width = "0%"; powerupBar.style.opacity = "0"; return; }
+  const icons = { shield: "🛡️", slowmo: "🐢", magnet: "🧲" };
+  powerupEl.textContent = icons[activePowerup] || "";
+  powerupBar.style.width = (powerupTimer / POWERUP_DURATION * 100) + "%";
+  powerupBar.style.opacity = "1";
+}
+function updateCoinsDisplay() { if (coinsEl) coinsEl.textContent = "🪙 " + sessionCoins; }
+function updateComboDisplay() {
+  if (!comboEl) return;
+  if (combo >= 2) { comboEl.textContent = "🔥 x" + combo + " COMBO"; comboEl.style.opacity = "1"; }
+  else { comboEl.style.opacity = "0"; }
+}
+function showMilestone(text) {
+  if (!milestoneEl) return;
+  milestoneEl.textContent = text; milestoneEl.classList.remove("milestone-anim");
+  void milestoneEl.offsetWidth; milestoneEl.classList.add("milestone-anim");
+}
+function updateGravityIndicator() {
+  if (gravitySign === 1) { gravityIndicatorEl.textContent = "⬇ NORMAL"; gravityIndicatorEl.className = "normal"; }
+  else { gravityIndicatorEl.textContent = "⬆ FLIPPED"; gravityIndicatorEl.className = "inverted"; }
+}
+function updateScore() { scoreEl.textContent = "Score: " + score; }
+function triggerShake(f, a) { shakeFrames = f; shakeAmount = a; }
