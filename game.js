@@ -386,3 +386,17 @@ function handleBirdHit() {
   invincibleFrames = INVINCIBLE_FRAMES; triggerShake(10, 12);
   if (lives <= 0) { playDie(); showDeadScreen(); }
 }
+
+// ── Update ─────────────────────────────────────────────────
+function update() {
+  if (state !== "playing") return;
+  frameCount++;
+  if (doubleFlappedTimer > 0) { doubleFlappedTimer--; if (doubleFlappedTimer === 0) doubleFlapped = false; }
+  const grav = gravitySign * Math.abs(GRAVITY_NORMAL);
+  birdVY += grav; birdVY = Math.max(-14, Math.min(14, birdVY));
+  if (activePowerup === "magnet" && pipes.length > 0) {
+    const np = pipes.find(p => p.x + PIPE_WIDTH > BIRD_X);
+    if (np) { const gc = np.topH + PIPE_GAP / 2; birdVY += (gc - birdY) * 0.015; }
+  }
+  birdY += birdVY;
+  if (birdY - BIRD_SIZE/2 < 0 || birdY + BIRD_SIZE/2 > H) { handleBirdHit(); if (state !== "playing") return; }
