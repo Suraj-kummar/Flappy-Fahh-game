@@ -417,3 +417,24 @@ function update() {
     if (birdCollidesWithPipe(p)) { combo = 0; updateComboDisplay(); handleBirdHit(); if (state !== "playing") return; }
   }
   pipes = pipes.filter(p => p.x + PIPE_WIDTH >= 0);
+  for (const c of coins) {
+    c.x -= pipeSpeed; c.spinAngle += 0.08;
+    if (!c.collected && circleDist(BIRD_X, birdY, c.x, c.y, BIRD_SIZE/2 + c.r)) { c.collected = true; sessionCoins++; updateCoinsDisplay(); playCoin(); spawnScoreParticles(); }
+  }
+  coins = coins.filter(c => c.x > -20 && !c.collected);
+  for (const pu of powerupItems) {
+    pu.x -= pipeSpeed; pu.bob += 0.06;
+    if (!pu.collected && circleDist(BIRD_X, birdY, pu.x, pu.y + Math.sin(pu.bob)*6, BIRD_SIZE/2 + pu.r)) {
+      pu.collected = true; activePowerup = pu.type; powerupTimer = POWERUP_DURATION;
+      updatePowerupDisplay(); playPowerup(); spawnPowerupBurst(pu.x, pu.y, pu.type);
+      if (pu.type === "shield") unlockAchievement("invincible");
+    }
+  }
+  powerupItems = powerupItems.filter(p => p.x > -30 && !p.collected);
+  if (invincibleFrames > 0) invincibleFrames--;
+  for (let i = particles.length-1; i >= 0; i--) { const p = particles[i]; p.x += p.vx; p.y += p.vy; p.alpha -= 0.03; p.r *= 0.97; if (p.alpha <= 0) particles.splice(i, 1); }
+  cloudOffset = (cloudOffset + pipeSpeed * 0.3) % W;
+  hillOffset  = (hillOffset  + pipeSpeed * 0.6) % W;
+  starOffset  = (starOffset  + pipeSpeed * 0.05) % W;
+  if (shakeFrames > 0) { shakeFrames--; shakeAmount *= 0.88; }
+}
