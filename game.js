@@ -400,3 +400,6 @@ function update() {
   }
   birdY += birdVY;
   if (birdY - BIRD_SIZE/2 < 0 || birdY + BIRD_SIZE/2 > H) { handleBirdHit(); if (state !== "playing") return; }
+  if (activePowerup) { powerupTimer--; if (powerupTimer <= 0) { activePowerup = null; powerupTimer = 0; } updatePowerupDisplay(); }
+  pipeSpeed = pipeSpeed_for(score);
+  if (pipes.length === 0 || W - pipes[pipes.length-1].x >= PIPE_SPAWN_DIST) spawnPipeAndItems();
