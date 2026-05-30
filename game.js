@@ -526,3 +526,13 @@ function drawBird() {
   if (gravitySign===-1) { ctx.fillStyle="#a29bfe"; for(let i=-1;i<=1;i++){ctx.beginPath();ctx.arc(i*r*0.35,-r-4+Math.abs(i)*3,4,0,Math.PI*2);ctx.fill();} }
   ctx.restore();
 }
+
+function drawParticles() {
+  for (const p of particles) { ctx.save(); ctx.globalAlpha=Math.max(0,p.alpha); ctx.fillStyle=p.color; ctx.shadowColor=p.color; ctx.shadowBlur=8; ctx.beginPath(); ctx.arc(p.x,p.y,Math.max(0,p.r),0,Math.PI*2); ctx.fill(); ctx.restore(); }
+}
+function drawBoundaries() {
+  ctx.strokeStyle="rgba(255,255,255,0.06)"; ctx.lineWidth=1; ctx.setLineDash([6,8]);
+  ctx.beginPath(); ctx.moveTo(0,2); ctx.lineTo(W,2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0,H-2); ctx.lineTo(W,H-2); ctx.stroke();
+  ctx.setLineDash([]);
+}
