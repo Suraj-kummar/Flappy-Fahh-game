@@ -536,3 +536,11 @@ function drawBoundaries() {
   ctx.beginPath(); ctx.moveTo(0,H-2); ctx.lineTo(W,H-2); ctx.stroke();
   ctx.setLineDash([]);
 }
+
+// ── Idle Bird ──────────────────────────────────────────────
+let idleBirdY = H / 2, idleBirdVY = 0;
+function updateIdleBird() {
+  idleBirdVY += 0.18; idleBirdY += idleBirdVY;
+  if (idleBirdY > H/2 + 15) { idleBirdY = H/2+15; idleBirdVY = -2.8; }
+  if (idleBirdY < H/2 - 15) { idleBirdY = H/2-15; idleBirdVY =  2.8; }
+}
