@@ -41,3 +41,26 @@ function playFahh(rate = 1.0) {
     clone.play().catch(() => {});
   } catch (_) {}
 }
+
+function playScore() {
+  try {
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination); osc.type = "square";
+    osc.frequency.setValueAtTime(660, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+  } catch (_) {}
+}
+function playDie() {
+  try {
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination); osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.38);
+    gain.gain.setValueAtTime(0.28, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.42);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.45);
+  } catch (_) {}
+}
