@@ -317,3 +317,17 @@ function handleFlap() {
   const rate = 0.9 + (pipeSpeed - PIPE_SPEED_INIT) / (PIPE_SPEED_MAX - PIPE_SPEED_INIT) * 0.4;
   playFahh(rate); spawnFlapParticles();
 }
+
+function handleGravityToggle() {
+  if (state !== "playing") return;
+  gravitySign *= -1; birdVY *= 0.4; gravityFlipCount++;
+  updateGravityIndicator();
+  playFahh(gravitySign === 1 ? 1.0 : 0.75);
+  spawnGravityParticles();
+}
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space" || e.code === "ArrowUp") { e.preventDefault(); handleFlap(); }
+  if (e.code === "ShiftLeft" || e.code === "ShiftRight") { e.preventDefault(); handleGravityToggle(); }
+});
+canvas.addEventListener("pointerdown", (e) => { e.preventDefault(); handleFlap(); });
+if (lbToggleBtn) lbToggleBtn.addEventListener("click", () => { lbPanel.classList.toggle("hidden"); renderLeaderboard(); });
