@@ -175,3 +175,16 @@ function renderLeaderboard() {
     '<span class="lb-score">' + e.score + '</span></div>'
   ).join("");
 }
+
+// ── Game State ─────────────────────────────────────────────
+let state = "start";
+let gravitySign = 1, birdY = H / 2, birdVY = 0;
+let score = 0, bestScore = parseInt(localStorage.getItem("fahh_best") || "0");
+let pipes = [], frameCount = 0, pipeSpeed = PIPE_SPEED_INIT;
+let particles = [], coins = [], powerupItems = [];
+let lives = MAX_LIVES, invincibleFrames = 0;
+let activePowerup = null, powerupTimer = 0, shieldHit = false;
+let combo = 0, comboActive = false, sessionCoins = 0;
+let doubleFlapped = false, doubleFlappedTimer = 0, gravityFlipCount = 0;
+let shakeFrames = 0, shakeAmount = 0;
+let cloudOffset = 0, hillOffset = 0, starOffset = 0;
