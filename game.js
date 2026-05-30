@@ -130,3 +130,29 @@ const MAX_LIVES           = 3;
 const INVINCIBLE_FRAMES   = 90;
 const POWERUP_DURATION    = 240;
 const DOUBLE_FLAP_RESET   = 60;
+
+// ── Achievements ───────────────────────────────────────────
+const ACHIEVEMENT_DEFS = [
+  { id: "first_flight",   icon: "🐣", name: "First Flight",   desc: "Play your first game" },
+  { id: "decade",         icon: "🔟", name: "Decade",         desc: "Reach score 10" },
+  { id: "speed_demon",    icon: "⚡", name: "Speed Demon",    desc: "Reach score 25" },
+  { id: "coin_hoarder",   icon: "🪙", name: "Coin Hoarder",   desc: "Collect 20 coins total" },
+  { id: "invincible",     icon: "🛡️", name: "Invincible",     desc: "Use a shield power-up" },
+  { id: "gravity_master", icon: "🔄", name: "Gravity Master", desc: "Flip gravity 10x in one run" },
+  { id: "century",        icon: "💯", name: "Century",        desc: "Reach score 50" },
+];
+let unlockedAchievements = new Set(JSON.parse(localStorage.getItem("fahh_achievements") || "[]"));
+let totalCoins = parseInt(localStorage.getItem("fahh_total_coins") || "0");
+function unlockAchievement(id) {
+  if (unlockedAchievements.has(id)) return;
+  unlockedAchievements.add(id);
+  localStorage.setItem("fahh_achievements", JSON.stringify([...unlockedAchievements]));
+  showAchievementToast(id);
+}
+function showAchievementToast(id) {
+  const def = ACHIEVEMENT_DEFS.find(a => a.id === id); if (!def) return;
+  const toast = document.getElementById("achievementToast");
+  toast.textContent = def.icon + " Achievement: " + def.name;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 3000);
+}
