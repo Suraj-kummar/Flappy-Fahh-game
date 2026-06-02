@@ -8,7 +8,7 @@
 
 bro it's a chicken.  
 that goes **FAHH**.  
-and you have to dodge pipes.  
+and you have to dodge pipes.    
 yeah that's it. that's the game.
 
 no lore. no story. no character development.  
