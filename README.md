@@ -38,7 +38,7 @@ just a screaming chicken and your will to survive.
 
 ---
 
-## tech stack (for the nerds in the chat)
+## tech stack (for the nerds in the chat) 
 
 ```
 HTML5  +  Vanilla JS  +  Canvas API  +  Web Audio API  +  Suffering
