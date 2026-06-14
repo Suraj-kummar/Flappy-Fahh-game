@@ -72,8 +72,6 @@ it REALLY goes FAHH.
 
 
 
-
-
 **caption:**
 > 582 lines of javascript.  
 > 1 angry chicken.  
