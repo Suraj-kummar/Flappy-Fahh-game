@@ -378,3 +378,98 @@ const PongGame = (() => {
         ctx.font = "bold 18px 'Press Start 2P', monospace";
         ctx.fillStyle = titleColor;
         ctx.shadowColor = titleColor;
+        ctx.shadowBlur = 24;
+        ctx.fillText(titleText, W / 2, H / 2 - 55);
+
+        ctx.shadowBlur = 0;
+        ctx.font = "12px 'Press Start 2P', monospace";
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        ctx.fillText(playerScore + "  —  " + aiScore, W / 2, H / 2 - 15);
+
+        drawBlinkText("CLICK OR PRESS SPACE", W / 2, H / 2 + 45, titleColor);
+
+        // Update best score in localStorage
+        if (isWin) {
+          const best = parseInt(localStorage.getItem("pong_best") || "0");
+          if (playerScore > best) localStorage.setItem("pong_best", playerScore);
+        }
+      }
+    }
+  }
+
+  let _blinkOn = true;
+  function drawBlinkText(text, x, y, color) {
+    if (Math.floor(Date.now() / 600) % 2 === 0) {
+      ctx.font = "9px 'Press Start 2P', monospace";
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 10;
+      ctx.fillText(text, x, y);
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  // ── Main loop ─────────────────────────────────────────────
+  function loop() {
+    update();
+    draw();
+    animId = requestAnimationFrame(loop);
+  }
+
+  // ── Public API ────────────────────────────────────────────
+  function init(canvasEl) {
+    canvas = canvasEl;
+    ctx    = canvas.getContext("2d");
+    W = canvas.width;
+    H = canvas.height;
+
+    gameState   = "start";
+    playerScore = 0;
+    aiScore     = 0;
+    mouseY      = null;
+    keyUp = keyDown = false;
+    particles   = [];
+    trail       = [];
+    resetBall(1);
+    playerY = H / 2 - PADDLE_H / 2;
+    aiY     = H / 2 - PADDLE_H / 2;
+    frameCount = 0;
+    lastPaddleHit = -100;
+
+    canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("touchmove", onTouchMove, { passive: false });
+    canvas.addEventListener("click", onClick);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup",   onKeyUp);
+
+    if (animId) cancelAnimationFrame(animId);
+    loop();
+  }
+
+  function destroy() {
+    if (animId) cancelAnimationFrame(animId);
+    animId = null;
+    if (!canvas) return;
+    canvas.removeEventListener("mousemove", onMouseMove);
+    canvas.removeEventListener("touchmove", onTouchMove);
+    canvas.removeEventListener("click", onClick);
+    window.removeEventListener("keydown", onKeyDown);
+    window.removeEventListener("keyup",   onKeyUp);
+  }
+
+  return { init, destroy };
+})();
