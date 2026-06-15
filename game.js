@@ -290,3 +290,149 @@ function update() {
   birdVY     = Math.max(-14, Math.min(14, birdVY)); // terminal velocity clamp
   birdY     += birdVY;
 
+  // Wall collisions
+  if (birdY - BIRD_SIZE / 2 < 0 || birdY + BIRD_SIZE / 2 > H) {
+    playDie();
+    showDeadScreen();
+    return;
+  }
+
+  // Pipe speed scaling
+  pipeSpeed = pipeSpeed_for(score);
+
+  // Spawn pipes
+  if (pipes.length === 0 || W - pipes[pipes.length - 1].x >= PIPE_SPAWN_DIST) {
+    spawnPipe();
+  }
+
+  // Move & score pipes
+  for (let i = pipes.length - 1; i >= 0; i--) {
+    const p = pipes[i];
+    p.x -= pipeSpeed;
+
+    // Score when bird passes pipe center
+    if (!p.scored && p.x + PIPE_WIDTH < BIRD_X) {
+      p.scored = true;
+      score++;
+      updateScore();
+      playScore();
+      spawnScoreParticles();
+    }
+
+    // Remove off-screen pipes
+    if (p.x + PIPE_WIDTH < 0) {
+      pipes.splice(i, 1);
+      continue;
+    }
+
+    // Collision
+    if (birdCollidesWithPipe(p)) {
+      playDie();
+      showDeadScreen();
+      return;
+    }
+  }
+
+  // Update particles
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x     += p.vx;
+    p.y     += p.vy;
+    p.alpha -= 0.035;
+    p.r     *= 0.96;
+    if (p.alpha <= 0) particles.splice(i, 1);
+  }
+}
+
+// ── Draw ──────────────────────────────────────────────────
+function drawBackground() {
+  // Sky gradient
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, "#0d0d2b");
+  sky.addColorStop(0.5, "#1a1a3e");
+  sky.addColorStop(1, "#0f2460");
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+
+  // Stars
+  ctx.fillStyle = "rgba(255,255,255,0.6)";
+  // Seed with a fixed set of stars each frame (static stars)
+  const starPositions = [
+    [30,  40], [80, 100], [140,  25], [200,  80], [270,  35], [320,  90],
+    [380,  55], [420, 130], [55, 200], [110, 150], [175, 220], [245, 170],
+    [310, 240], [395, 180], [440,  70], [15, 300], [90, 280], [160, 340],
+    [230, 295], [300, 360], [370, 315], [435, 250], [20, 430], [100, 460],
+    [170, 400], [240, 470], [310, 420], [390, 480], [450, 395],
+  ];
+  for (const [sx, sy] of starPositions) {
+    const flicker = 0.5 + 0.5 * Math.sin((frameCount + sx * 3) * 0.04);
+    ctx.globalAlpha = 0.3 + flicker * 0.5;
+    ctx.fillRect(sx, sy, 1.5, 1.5);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawPipe(p) {
+  const radius = 6;
+
+  // Pipe color based on gravity mode
+  const pipeBody = gravitySign === 1
+    ? ctx.createLinearGradient(p.x, 0, p.x + PIPE_WIDTH, 0)
+    : ctx.createLinearGradient(p.x, 0, p.x + PIPE_WIDTH, 0);
+
+  if (gravitySign === 1) {
+    pipeBody.addColorStop(0, "#1b6b3a");
+    pipeBody.addColorStop(0.4, "#2ecc71");
+    pipeBody.addColorStop(1, "#145c30");
+  } else {
+    pipeBody.addColorStop(0, "#6c1b6b");
+    pipeBody.addColorStop(0.4, "#c0392b");
+    pipeBody.addColorStop(1, "#5c1445");
+  }
+
+  const capH  = 20;
+  const capW  = PIPE_WIDTH + 10;
+  const capX  = p.x - 5;
+
+  function drawRoundedRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  // ── Top pipe ──
+  ctx.fillStyle = pipeBody;
+  drawRoundedRect(p.x, 0, PIPE_WIDTH, p.topH - capH, 0);
+  ctx.fill();
+
+  // Top pipe cap
+  ctx.fillStyle = gravitySign === 1 ? "#27ae60" : "#e74c3c";
+  drawRoundedRect(capX, p.topH - capH, capW, capH, radius);
+  ctx.fill();
+
+  // Shine on top pipe
+  ctx.fillStyle = "rgba(255,255,255,0.12)";
+  ctx.fillRect(p.x + 6, 0, 8, p.topH);
+
+  // ── Bottom pipe ──
+  ctx.fillStyle = pipeBody;
+  drawRoundedRect(p.x, p.bottomY + capH, PIPE_WIDTH, H - p.bottomY - capH, 0);
+  ctx.fill();
+
+  // Bottom pipe cap
+  ctx.fillStyle = gravitySign === 1 ? "#27ae60" : "#e74c3c";
+  drawRoundedRect(capX, p.bottomY, capW, capH, radius);
+  ctx.fill();
+
+  // Shine on bottom pipe
+  ctx.fillStyle = "rgba(255,255,255,0.12)";
+  ctx.fillRect(p.x + 6, p.bottomY + capH, 8, H);
+}
