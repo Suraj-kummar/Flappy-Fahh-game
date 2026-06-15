@@ -319,3 +319,110 @@ const WhackAMoleGame = (() => {
     moles = Array.from({ length: HOLE_COUNT }, () => null);
     playGameOver();
   }
+
+  // ─── Hit Testing ─────────────────────────────────────────
+  function handleHit(cx, cy) {
+    // Resume audio context on first interaction
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+
+    if (state === 'start' || state === 'gameover') {
+      resetGame();
+      return;
+    }
+    if (state !== 'playing') return;
+
+    // Test each visible mole (back-to-front, so topmost wins)
+    for (let i = HOLE_COUNT - 1; i >= 0; i--) {
+      const m = moles[i];
+      if (!m || m.whacked || m.phase === 'falling') continue;
+
+      const h   = HOLES[i];
+      const riseY  = easeOutBack(Math.min(m.progress, 1));
+      const yOff   = (1 - riseY) * (MOLE_H + 10);   // pixels still hidden
+      const moleX  = h.x;
+      const moleY  = h.y - MOLE_H / 2 + yOff - 6;
+
+      // Generous hit box
+      const dx = cx - moleX;
+      const dy = cy - moleY;
+      if (Math.abs(dx) < MOLE_W / 2 + 8 && Math.abs(dy) < MOLE_H / 2 + 10) {
+        // Whack!
+        m.whacked = true;
+        const pts = m.golden ? 50 : 10;
+        score += pts;
+        spawnParticles(moleX, moleY, m.golden);
+        m.golden ? playGoldenHit() : playWhack();
+
+        // Show floating score text as a particle
+        particles.push({
+          x    : moleX,
+          y    : moleY - 20,
+          vx   : 0,
+          vy   : -1.5,
+          life : 1,
+          decay: 0.018,
+          r    : 0,
+          color: m.golden ? '#FFD700' : '#FFFFFF',
+          text : `+${pts}`,
+          star : false,
+        });
+        return; // only one mole per click
+      }
+    }
+  }
+
+  // ─── Drawing Helpers ─────────────────────────────────────
+
+  /** Draw a single hole (dirt mound) */
+  function drawHole(x, y) {
+    // Mound shadow
+    ctx.save();
+    const grad = ctx.createRadialGradient(x, y + 4, 4, x, y + 4, HOLE_R + 10);
+    grad.addColorStop(0,   'rgba(0,0,0,0.55)');
+    grad.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(x, y + 4, HOLE_R + 10, HOLE_RY + 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Dirt mound
+    ctx.save();
+    const dirtGrad = ctx.createLinearGradient(x - HOLE_R, y - HOLE_RY, x + HOLE_R, y + HOLE_RY + 4);
+    dirtGrad.addColorStop(0, '#7B4F2E');
+    dirtGrad.addColorStop(1, '#4A2E10');
+    ctx.fillStyle = dirtGrad;
+    ctx.beginPath();
+    ctx.ellipse(x, y, HOLE_R, HOLE_RY, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Dark hole interior
+    const holeGrad = ctx.createRadialGradient(x, y - 2, 2, x, y, HOLE_R - 8);
+    holeGrad.addColorStop(0,   '#1A0A00');
+    holeGrad.addColorStop(0.6, '#2E1608');
+    holeGrad.addColorStop(1,   '#4A2E10');
+    ctx.fillStyle = holeGrad;
+    ctx.beginPath();
+    ctx.ellipse(x, y - 2, HOLE_R - 8, HOLE_RY - 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Mound highlight
+    ctx.strokeStyle = 'rgba(180,120,60,0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(x, y - 3, HOLE_R - 4, HOLE_RY - 3, 0, Math.PI, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /** Draw a mole at the given hole, with progress 0-1 (1=fully up) */
+  function drawMole(holeIdx, mole) {
+    const h    = HOLES[holeIdx];
+    const ease = easeOutBack(Math.min(mole.progress, 1));
+    const yOff = (1 - ease) * (MOLE_H + 10);
+
+    // Squish on whack
+    let scaleX = 1, scaleY = 1;
+    if (mole.whacked && mole.whackAnim < 1) {
+      const sq = Math.sin(mole.whackAnim * Math.PI);
+      scaleX = 1 + sq * 0.35;
