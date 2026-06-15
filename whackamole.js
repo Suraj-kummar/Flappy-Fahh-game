@@ -533,3 +533,110 @@ const WhackAMoleGame = (() => {
 
     // ── Golden glow ring ───────────────────────────────────
     if (isGolden) {
+      ctx.save();
+      ctx.shadowColor = '#FFD700';
+      ctx.shadowBlur  = 20;
+      ctx.strokeStyle = 'rgba(255,215,0,0.7)';
+      ctx.lineWidth   = 3;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, MOLE_W / 2 + 5, MOLE_H / 2 + 5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  // ─── Main Draw ───────────────────────────────────────────
+  function draw(timestamp) {
+    ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+    // ── Background ────────────────────────────────────────
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, CANVAS_H);
+    bgGrad.addColorStop(0, '#050510');
+    bgGrad.addColorStop(1, '#0A1628');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    // Subtle grid pattern
+    ctx.strokeStyle = 'rgba(100,100,200,0.04)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < CANVAS_W; x += 30) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, CANVAS_H); ctx.stroke();
+    }
+    for (let y = 0; y < CANVAS_H; y += 30) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(CANVAS_W, y); ctx.stroke();
+    }
+
+    // Grass strip
+    const grassGrad = ctx.createLinearGradient(0, HUD_H - 10, 0, HUD_H + 20);
+    grassGrad.addColorStop(0, '#1A4A1A');
+    grassGrad.addColorStop(1, '#0D2B0D');
+    ctx.fillStyle = grassGrad;
+    ctx.fillRect(0, HUD_H - 10, CANVAS_W, CANVAS_H - HUD_H + 10);
+
+    // Grass highlight
+    ctx.fillStyle = 'rgba(80,200,80,0.07)';
+    ctx.fillRect(0, HUD_H - 10, CANVAS_W, 6);
+
+    if (state === 'start') {
+      drawStartScreen(timestamp);
+    } else if (state === 'playing') {
+      drawPlayField(timestamp);
+    } else if (state === 'gameover') {
+      drawGameOverScreen(timestamp);
+    }
+  }
+
+  function drawPlayField(timestamp) {
+    // Draw holes first (back layer)
+    HOLES.forEach((h, i) => drawHole(h.x, h.y));
+
+    // Draw moles that are partially or fully up — BELOW hole rim
+    for (let i = 0; i < HOLE_COUNT; i++) {
+      const m = moles[i];
+      if (!m || m.progress <= 0) continue;
+      drawMole(i, m);
+    }
+
+    // Re-draw hole rims on top so moles appear to emerge from within
+    HOLES.forEach((h, i) => {
+      // Just the front ellipse rim (dirt lip)
+      const dirtGrad = ctx.createLinearGradient(h.x - HOLE_R, h.y, h.x + HOLE_R, h.y + HOLE_RY + 4);
+      dirtGrad.addColorStop(0, '#7B4F2E');
+      dirtGrad.addColorStop(1, '#4A2E10');
+      ctx.fillStyle = dirtGrad;
+      ctx.beginPath();
+      ctx.ellipse(h.x, h.y + 4, HOLE_R + 2, HOLE_RY + 3, 0, 0, Math.PI);
+      ctx.fill();
+
+      // Rim highlight
+      ctx.strokeStyle = 'rgba(180,120,60,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(h.x, h.y + 3, HOLE_R + 2, HOLE_RY + 2, 0, 0, Math.PI);
+      ctx.stroke();
+    });
+
+    // Draw particles
+    drawParticles();
+
+    // HUD
+    drawHUD();
+  }
+
+  function drawHUD() {
+    // Timer bar background
+    const barX = 14, barY = 14, barW = CANVAS_W - 28, barH = 18;
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    roundRect(barX - 2, barY - 2, barW + 4, barH + 4, 10);
+    ctx.fill();
+
+    const frac = timeLeft / GAME_DURATION;
+    const barColor = frac > 0.5
+      ? `hsl(${120 * (frac - 0.5) * 2}, 80%, 50%)`    // green
+      : frac > 0.25
+        ? `hsl(${60 * frac * 4}, 80%, 50%)`            // yellow
+        : '#FF3030';                                    // red
+
+    // Pulse effect when low
