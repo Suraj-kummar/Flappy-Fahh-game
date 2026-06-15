@@ -127,3 +127,46 @@
       40%      { transform: translateX(8px); }
       60%      { transform: translateX(-5px); }
       80%      { transform: translateX(5px); }
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 0.45; }
+      50%      { opacity: 1; }
+    }
+
+    /* Game title badge inside overlay */
+    .game-title-badge {
+      position: absolute;
+      top: 0; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      padding: 6px 20px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.55rem;
+      letter-spacing: 2px;
+      z-index: 10;
+    }
+    .game-title-badge.flappy { color: #f9ca24; }
+    .game-title-badge.pong   { color: #4ecca3; }
+    .game-title-badge.memory { color: #a29bfe; }
+
+    /* Responsive canvas sizing */
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- Starfield background -->
+<div class="starfield" id="starfield"></div>
+
+<!-- CRT scanlines -->
+<div class="crt-lines"></div>
+
+<!-- ── HUB ─────────────────────────────────────────────────── -->
+<div id="hub">
+  <header class="hub-header">
+    <div class="hub-logo">🎮 FAHH ARCADE</div>
+    <div class="hub-subtitle">Choose your game</div>
+  </header>
+
+  <div class="games-grid">
