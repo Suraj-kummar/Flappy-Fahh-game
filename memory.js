@@ -174,3 +174,92 @@ const MemoryGame = (() => {
             const prev = JSON.parse(localStorage.getItem(key) || "null");
             const cur  = { moves, secs: elapsedSecs };
             if (!prev || moves < prev.moves || (moves === prev.moves && elapsedSecs < prev.secs)) {
+              localStorage.setItem(key, JSON.stringify(cur));
+            }
+          }
+        }, 500);
+      } else {
+        // No match — flip back after delay
+        lockTimer = setTimeout(() => {
+          cards[a].flipped = false;
+          cards[b].flipped = false;
+          selected = [];
+          playMiss();
+          gameState = "playing";
+        }, 900);
+      }
+    }
+  }
+
+  function onTouch(e) {
+    e.preventDefault();
+    onClick({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+  }
+
+  // ── Update ────────────────────────────────────────────────
+  function update() {
+    frameCount++;
+
+    // Animate flip progress
+    for (const c of cards) {
+      const target = c.flipped ? 1 : 0;
+      c.flipT += (target - c.flipT) * 0.22;
+    }
+
+    // Particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.alpha -= 0.03; p.vy += 0.12;
+      p.r *= 0.97;
+      if (p.alpha <= 0) particles.splice(i, 1);
+    }
+
+    // Elapsed time
+    if (startTime && gameState !== "won") {
+      elapsedSecs = Math.round((Date.now() - startTime) / 1000);
+    }
+  }
+
+  // ── Draw ──────────────────────────────────────────────────
+  function drawCard(c) {
+    const cx = OFFSET_X + c.col * (CARD_W + GAP);
+    const cy = OFFSET_Y + c.row * (CARD_H + GAP);
+
+    const flipT   = c.flipT;
+    // Scale x from 1 → 0 → 1 during flip; show back if flipT < 0.5, front if >= 0.5
+    const scaleX  = Math.abs(Math.cos(flipT * Math.PI));
+    const showFace = flipT >= 0.5;
+
+    ctx.save();
+    ctx.translate(cx + CARD_W / 2, cy + CARD_H / 2);
+    ctx.scale(Math.max(0.01, scaleX), 1);
+    ctx.translate(-CARD_W / 2, -CARD_H / 2);
+
+    if (c.matched) {
+      // Matched — faint glowing card
+      ctx.shadowColor = "#f9ca24";
+      ctx.shadowBlur  = 12;
+      const mg = ctx.createLinearGradient(0, 0, CARD_W, CARD_H);
+      mg.addColorStop(0, "rgba(249,202,36,0.18)");
+      mg.addColorStop(1, "rgba(240,147,43,0.10)");
+      ctx.fillStyle = mg;
+    } else if (showFace) {
+      ctx.shadowColor = "#a29bfe";
+      ctx.shadowBlur  = 14;
+      const fg = ctx.createLinearGradient(0, 0, CARD_W, CARD_H);
+      fg.addColorStop(0, "#1a1040");
+      fg.addColorStop(1, "#0d0820");
+      ctx.fillStyle = fg;
+    } else {
+      // Card back
+      ctx.shadowColor = "rgba(162,155,254,0.4)";
+      ctx.shadowBlur  = 6;
+      const bg = ctx.createLinearGradient(0, 0, CARD_W, CARD_H);
+      bg.addColorStop(0, "#12005e");
+      bg.addColorStop(1, "#3a0080");
+      ctx.fillStyle = bg;
+    }
+
+    roundRect(ctx, 0, 0, CARD_W, CARD_H, 10);
+    ctx.fill();
+
