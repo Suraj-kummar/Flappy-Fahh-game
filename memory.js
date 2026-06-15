@@ -86,3 +86,91 @@ const MemoryGame = (() => {
   }
 
   // ── Game logic ────────────────────────────────────────────
+  function buildCards() {
+    const doubled = [...EMOJIS, ...EMOJIS];
+    // Fisher-Yates shuffle
+    for (let i = doubled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [doubled[i], doubled[j]] = [doubled[j], doubled[i]];
+    }
+    cards = doubled.map((emoji, idx) => ({
+      emoji,
+      flipped : false,
+      matched : false,
+      flipT   : 0,      // 0 = face-down, 1 = face-up (animation progress)
+      col     : idx % GRID_COLS,
+      row     : Math.floor(idx / GRID_COLS),
+    }));
+  }
+
+  function resetGame() {
+    buildCards();
+    selected     = [];
+    moves        = 0;
+    matchedPairs = 0;
+    startTime    = null;
+    elapsedSecs  = 0;
+    gameState    = "playing";
+    particles    = [];
+    if (lockTimer) { clearTimeout(lockTimer); lockTimer = null; }
+  }
+
+  function cardIndexAt(x, y) {
+    for (let i = 0; i < cards.length; i++) {
+      const c  = cards[i];
+      const cx = OFFSET_X + c.col * (CARD_W + GAP);
+      const cy = OFFSET_Y + c.row * (CARD_H + GAP);
+      if (x >= cx && x <= cx + CARD_W && y >= cy && y <= cy + CARD_H) return i;
+    }
+    return -1;
+  }
+
+  function onClick(e) {
+    if (gameState !== "playing") {
+      if (gameState === "won") { resetGame(); return; }
+      return;
+    }
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = W / rect.width;
+    const scaleY = H / rect.height;
+    const mx = (e.clientX - rect.left) * scaleX;
+    const my = (e.clientY - rect.top)  * scaleY;
+
+    const idx = cardIndexAt(mx, my);
+    if (idx < 0) return;
+    const card = cards[idx];
+    if (card.flipped || card.matched || selected.includes(idx)) return;
+    if (selected.length >= 2) return;
+
+    // Start timer on first click
+    if (!startTime) startTime = Date.now();
+
+    card.flipped = true;
+    selected.push(idx);
+    playFlip();
+
+    if (selected.length === 2) {
+      moves++;
+      gameState = "locked";
+      const [a, b] = selected;
+      if (cards[a].emoji === cards[b].emoji) {
+        // Match!
+        lockTimer = setTimeout(() => {
+          cards[a].matched = true;
+          cards[b].matched = true;
+          spawnMatchParticles(cards[a].col, cards[a].row);
+          spawnMatchParticles(cards[b].col, cards[b].row);
+          playMatch();
+          matchedPairs++;
+          selected = [];
+          gameState = matchedPairs === EMOJIS.length ? "won" : "playing";
+          if (gameState === "won") {
+            elapsedSecs = Math.round((Date.now() - startTime) / 1000);
+            playWin();
+            // Save best
+            const key  = "memory_best";
+            const prev = JSON.parse(localStorage.getItem(key) || "null");
+            const cur  = { moves, secs: elapsedSecs };
+            if (!prev || moves < prev.moves || (moves === prev.moves && elapsedSecs < prev.secs)) {
