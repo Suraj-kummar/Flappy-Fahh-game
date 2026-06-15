@@ -212,3 +212,110 @@ const WhackAMoleGame = (() => {
 
   // ─── Reset / Init Logic ──────────────────────────────────
   function resetGame() {
+    score       = 0;
+    timeLeft    = GAME_DURATION;
+    tickAccum   = 0;
+    spawnAccum  = 0;
+    spawnInterval = 1200;
+    lastTickSecond = -1;
+    particles   = [];
+    moles       = Array.from({ length: HOLE_COUNT }, () => null);
+    state       = 'playing';
+    lastTimestamp = performance.now();
+  }
+
+  // ─── Game Logic Update ───────────────────────────────────
+  function update(dt) {
+    if (state !== 'playing') return;
+
+    // ── Timer ──────────────────────────────────────────────
+    tickAccum += dt;
+    if (tickAccum >= 1000) {
+      tickAccum -= 1000;
+      timeLeft  = Math.max(0, timeLeft - 1);
+
+      // Tick sound in final 10s
+      if (timeLeft <= 10 && timeLeft > 0) {
+        playTick();
+      }
+
+      if (timeLeft === 0) {
+        endGame();
+        return;
+      }
+    }
+
+    // ── Difficulty ramp: spawnInterval decreases over time ──
+    const elapsed  = GAME_DURATION - timeLeft;
+    const progress = Math.min(elapsed / GAME_DURATION, 1);
+    spawnInterval  = 1200 - progress * 700;   // 1200 → 500 ms
+
+    // ── Mole Spawning ─────────────────────────────────────
+    spawnAccum += dt;
+    if (spawnAccum >= spawnInterval) {
+      spawnAccum -= spawnInterval;
+      trySpawnMole();
+    }
+
+    // ── Update each mole ──────────────────────────────────
+    for (let i = 0; i < HOLE_COUNT; i++) {
+      const m = moles[i];
+      if (!m) continue;
+
+      if (m.phase === 'rising') {
+        m.progress += dt / 260;
+        if (m.progress >= 1) { m.progress = 1; m.phase = 'up'; }
+      } else if (m.phase === 'up') {
+        m.upTimer += dt;
+        if (m.upTimer >= m.upDuration) { m.phase = 'falling'; m.progress = 1; }
+      } else if (m.phase === 'falling') {
+        m.progress -= dt / 200;
+        if (m.progress <= 0) { m.progress = 0; moles[i] = null; }
+      }
+
+      // Whack squish animation
+      if (m.whacked && m.whackAnim < 1) {
+        m.whackAnim = Math.min(1, m.whackAnim + dt / 250);
+        if (m.whackAnim >= 1) { m.phase = 'falling'; }
+      }
+    }
+
+    // ── Particles ─────────────────────────────────────────
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x  += p.vx;
+      p.y  += p.vy;
+      p.vy += 0.15;   // gravity
+      p.life -= p.decay;
+      if (p.life <= 0) particles.splice(i, 1);
+    }
+  }
+
+  function trySpawnMole() {
+    // Count how many are currently up (not gone)
+    const activeCount = moles.filter(m => m && m.phase !== 'gone').length;
+    if (activeCount >= MAX_MOLES_UP) return;
+
+    // Find a free hole
+    const free = [];
+    for (let i = 0; i < HOLE_COUNT; i++) {
+      if (!moles[i]) free.push(i);
+    }
+    if (free.length === 0) return;
+
+    const idx    = free[Math.floor(Math.random() * free.length)];
+    const golden = Math.random() < GOLDEN_CHANCE;
+    moles[idx]   = makeMole(idx, golden);
+    playPop();
+  }
+
+  function endGame() {
+    state = 'gameover';
+    if (score > bestScore) {
+      bestScore = score;
+      try { localStorage.setItem(LS_KEY, bestScore); } catch (_) {}
+    }
+    // Clear all moles
+    moles = Array.from({ length: HOLE_COUNT }, () => null);
+    playGameOver();
+  }
