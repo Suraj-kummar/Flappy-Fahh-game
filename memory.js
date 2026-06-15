@@ -263,3 +263,91 @@ const MemoryGame = (() => {
     roundRect(ctx, 0, 0, CARD_W, CARD_H, 10);
     ctx.fill();
 
+    // Border
+    ctx.strokeStyle = c.matched
+      ? "rgba(249,202,36,0.6)"
+      : showFace
+        ? "rgba(162,155,254,0.8)"
+        : "rgba(162,155,254,0.3)";
+    ctx.lineWidth = 1.5;
+    ctx.shadowBlur = 0;
+    roundRect(ctx, 0, 0, CARD_W, CARD_H, 10);
+    ctx.stroke();
+
+    if (showFace || c.matched) {
+      // Emoji
+      ctx.font = `${Math.floor(CARD_H * 0.42)}px serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = c.matched ? "rgba(255,255,255,0.5)" : "#fff";
+      ctx.fillText(c.emoji, CARD_W / 2, CARD_H / 2);
+    } else {
+      // Back pattern — question mark
+      ctx.font = `bold ${Math.floor(CARD_H * 0.32)}px 'Outfit', sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "rgba(162,155,254,0.4)";
+      ctx.fillText("?", CARD_W / 2, CARD_H / 2);
+    }
+
+    ctx.restore();
+  }
+
+  function drawHUD() {
+    // Moves
+    ctx.font = "bold 13px 'Press Start 2P', monospace";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#a29bfe";
+    ctx.shadowColor = "#a29bfe";
+    ctx.shadowBlur = 10;
+    ctx.fillText(`MOVES: ${moves}`, 14, 28);
+
+    // Timer
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#fd79a8";
+    ctx.shadowColor = "#fd79a8";
+    ctx.fillText(`TIME: ${elapsedSecs}s`, W - 14, 28);
+
+    ctx.shadowBlur = 0;
+  }
+
+  function draw() {
+    // Background
+    ctx.fillStyle = "#08050f";
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle grid glow
+    for (let r = 0; r < GRID_ROWS; r++) {
+      for (let cc = 0; cc < GRID_COLS; cc++) {
+        const gx = OFFSET_X + cc * (CARD_W + GAP);
+        const gy = OFFSET_Y + r  * (CARD_H + GAP);
+        ctx.fillStyle = "rgba(162,155,254,0.04)";
+        roundRect(ctx, gx - 2, gy - 2, CARD_W + 4, CARD_H + 4, 12);
+        ctx.fill();
+      }
+    }
+
+    // Cards
+    for (const c of cards) drawCard(c);
+
+    // Particles
+    for (const p of particles) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.fillStyle   = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur  = 8;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, Math.max(0.5, p.r), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    drawHUD();
+
+    // Win screen
+    if (gameState === "won") {
+      ctx.fillStyle = "rgba(0,0,0,0.78)";
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.textAlign = "center";
