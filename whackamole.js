@@ -747,3 +747,110 @@ const WhackAMoleGame = (() => {
     ctx.quadraticCurveTo(x, y + h, x, y + h - r);
     ctx.lineTo(x, y + r);
     ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function drawStartScreen(timestamp) {
+    // Animated moles peeking from holes
+    HOLES.forEach((h, i) => {
+      drawHole(h.x, h.y);
+      // Peek animation
+      const offset = Math.sin(timestamp / 900 + i * 1.1) * 0.5 + 0.5;
+      if (offset > 0.1) {
+        const fakeMole = { progress: offset * 0.55, phase: 'up', upTimer: timestamp, whacked: false, whackAnim: 0, golden: i === 4 };
+        drawMole(i, fakeMole);
+      }
+    });
+
+    // Re-draw rims
+    HOLES.forEach(h => {
+      const dirtGrad = ctx.createLinearGradient(h.x - HOLE_R, h.y, h.x + HOLE_R, h.y + HOLE_RY + 4);
+      dirtGrad.addColorStop(0, '#7B4F2E');
+      dirtGrad.addColorStop(1, '#4A2E10');
+      ctx.fillStyle = dirtGrad;
+      ctx.beginPath();
+      ctx.ellipse(h.x, h.y + 4, HOLE_R + 2, HOLE_RY + 3, 0, 0, Math.PI);
+      ctx.fill();
+    });
+
+    // Semi-transparent overlay
+    ctx.fillStyle = 'rgba(2,3,20,0.72)';
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    // Title glow
+    const pulse = 0.85 + 0.15 * Math.sin(timestamp / 600);
+    ctx.save();
+    ctx.textAlign   = 'center';
+    ctx.shadowColor = '#00FFFF';
+    ctx.shadowBlur  = 30 * pulse;
+    ctx.fillStyle   = '#00FFFF';
+    ctx.font        = '22px "Press Start 2P", monospace';
+    ctx.fillText('WHACK-A-MOLE', CANVAS_W / 2, 140);
+    ctx.shadowBlur  = 0;
+
+    // Subtitle
+    ctx.fillStyle = '#FFD700';
+    ctx.font      = '9px "Press Start 2P", monospace';
+    ctx.fillText('ARCADE EDITION', CANVAS_W / 2, 165);
+
+    // Instructions
+    ctx.fillStyle = 'rgba(200,220,255,0.85)';
+    ctx.font      = '8px "Press Start 2P", monospace';
+    ctx.fillText('WHACK THE MOLES!', CANVAS_W / 2, 220);
+    ctx.fillStyle = '#FFD700';
+    ctx.fillText('★ GOLDEN MOLE = +50 ★', CANVAS_W / 2, 240);
+    ctx.fillStyle = 'rgba(200,220,255,0.7)';
+    ctx.fillText('NORMAL MOLE = +10', CANVAS_W / 2, 260);
+    ctx.fillText(`60 SECONDS ON THE CLOCK`, CANVAS_W / 2, 280);
+
+    // Best
+    if (bestScore > 0) {
+      ctx.fillStyle = '#FFD700';
+      ctx.font      = '8px "Press Start 2P", monospace';
+      ctx.fillText(`BEST: ${bestScore}`, CANVAS_W / 2, 310);
+    }
+
+    // Start prompt
+    const blink = Math.floor(timestamp / 500) % 2 === 0;
+    if (blink) {
+      ctx.fillStyle   = '#FFFFFF';
+      ctx.shadowColor = '#FFFFFF';
+      ctx.shadowBlur  = 12;
+      ctx.font        = '9px "Press Start 2P", monospace';
+      ctx.fillText('CLICK OR SPACE TO START', CANVAS_W / 2, CANVAS_H - 50);
+    }
+    ctx.restore();
+  }
+
+  function drawGameOverScreen(timestamp) {
+    // Draw still holes for background
+    HOLES.forEach(h => drawHole(h.x, h.y));
+
+    // Overlay
+    ctx.fillStyle = 'rgba(2,3,20,0.82)';
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    ctx.save();
+    ctx.textAlign = 'center';
+
+    // GAME OVER
+    ctx.shadowColor = '#FF3030';
+    ctx.shadowBlur  = 28;
+    ctx.fillStyle   = '#FF3030';
+    ctx.font        = '22px "Press Start 2P", monospace';
+    ctx.fillText('GAME OVER', CANVAS_W / 2, 160);
+    ctx.shadowBlur  = 0;
+
+    // Score
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font      = '10px "Press Start 2P", monospace';
+    ctx.fillText('YOUR SCORE', CANVAS_W / 2, 210);
+
+    ctx.shadowColor = '#FFD700';
+    ctx.shadowBlur  = 20;
+    ctx.fillStyle   = '#FFD700';
+    ctx.font        = '30px "Press Start 2P", monospace';
+    ctx.fillText(`${score}`, CANVAS_W / 2, 255);
+    ctx.shadowBlur  = 0;
+
+    // Best
