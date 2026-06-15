@@ -854,3 +854,114 @@ const WhackAMoleGame = (() => {
     ctx.shadowBlur  = 0;
 
     // Best
+    ctx.fillStyle = score >= bestScore ? '#00FF88' : 'rgba(200,200,255,0.7)';
+    ctx.font      = '8px "Press Start 2P", monospace';
+    if (score >= bestScore && bestScore > 0) {
+      ctx.shadowColor = '#00FF88';
+      ctx.shadowBlur  = 15;
+      ctx.fillText('★ NEW BEST! ★', CANVAS_W / 2, 285);
+      ctx.shadowBlur  = 0;
+    } else {
+      ctx.fillText(`BEST: ${bestScore}`, CANVAS_W / 2, 285);
+    }
+
+    // Restart prompt
+    const blink = Math.floor(timestamp / 500) % 2 === 0;
+    if (blink) {
+      ctx.fillStyle   = '#FFFFFF';
+      ctx.shadowColor = '#FFFFFF';
+      ctx.shadowBlur  = 12;
+      ctx.font        = '9px "Press Start 2P", monospace';
+      ctx.fillText('CLICK OR SPACE TO PLAY', CANVAS_W / 2, CANVAS_H - 50);
+      ctx.shadowBlur  = 0;
+    }
+
+    ctx.restore();
+    drawParticles();
+  }
+
+  // ─── Animation Loop ──────────────────────────────────────
+  function loop(timestamp) {
+    const dt = Math.min(timestamp - lastTimestamp, 80); // cap at 80ms
+    lastTimestamp = timestamp;
+
+    update(dt);
+    draw(timestamp);
+
+    animId = requestAnimationFrame(loop);
+  }
+
+  // ─── Event Handlers ──────────────────────────────────────
+  function onKeyDown(e) {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (state === 'start' || state === 'gameover') resetGame();
+    }
+  }
+
+  function onCanvasClick(e) {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_W / rect.width;
+    const scaleY = CANVAS_H / rect.height;
+    const cx = (e.clientX - rect.left) * scaleX;
+    const cy = (e.clientY - rect.top)  * scaleY;
+    handleHit(cx, cy);
+  }
+
+  function onCanvasTouch(e) {
+    e.preventDefault();
+    const rect  = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_W / rect.width;
+    const scaleY = CANVAS_H / rect.height;
+    const touch = e.changedTouches[0];
+    const cx = (touch.clientX - rect.left) * scaleX;
+    const cy = (touch.clientY - rect.top)  * scaleY;
+    handleHit(cx, cy);
+  }
+
+  // ─── Public API ──────────────────────────────────────────
+  function init(canvasEl) {
+    canvas = canvasEl;
+    ctx    = canvas.getContext('2d');
+
+    canvas.width  = CANVAS_W;
+    canvas.height = CANVAS_H;
+
+    // Load best score
+    try {
+      bestScore = parseInt(localStorage.getItem(LS_KEY)) || 0;
+    } catch (_) { bestScore = 0; }
+
+    // Init moles array
+    moles = Array.from({ length: HOLE_COUNT }, () => null);
+
+    // Attach event listeners
+    window.addEventListener('keydown', onKeyDown);
+    canvas.addEventListener('click',     onCanvasClick);
+    canvas.addEventListener('touchstart', onCanvasTouch, { passive: false });
+
+    // Start animation loop on start screen
+    state = 'start';
+    lastTimestamp = performance.now();
+    animId = requestAnimationFrame(loop);
+  }
+
+  function destroy() {
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    window.removeEventListener('keydown', onKeyDown);
+    if (canvas) {
+      canvas.removeEventListener('click',      onCanvasClick);
+      canvas.removeEventListener('touchstart', onCanvasTouch);
+    }
+    if (audioCtx) {
+      try { audioCtx.close(); } catch (_) {}
+      audioCtx = null;
+    }
+    canvas = null;
+    ctx    = null;
+  }
+
+  return { init, destroy };
+
+})();
