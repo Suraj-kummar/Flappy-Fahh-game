@@ -93,3 +93,98 @@ const PongGame = (() => {
   }
 
   // ── Input ─────────────────────────────────────────────────
+  let mouseY = null;
+  let keyUp   = false;
+  let keyDown = false;
+
+  function onMouseMove(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleY = H / rect.height;
+    mouseY = (e.clientY - rect.top) * scaleY - PADDLE_H / 2;
+  }
+
+  function onTouchMove(e) {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const scaleY = H / rect.height;
+    mouseY = (e.touches[0].clientY - rect.top) * scaleY - PADDLE_H / 2;
+  }
+
+  function onKeyDown(e) {
+    if (e.code === "ArrowUp"   || e.code === "KeyW") { keyUp   = true; e.preventDefault(); }
+    if (e.code === "ArrowDown" || e.code === "KeyS") { keyDown = true; e.preventDefault(); }
+    if ((e.code === "Space" || e.code === "Enter") && gameState !== "playing") {
+      e.preventDefault();
+      startGame();
+    }
+  }
+
+  function onKeyUp(e) {
+    if (e.code === "ArrowUp"   || e.code === "KeyW") keyUp   = false;
+    if (e.code === "ArrowDown" || e.code === "KeyS") keyDown = false;
+  }
+
+  function onClick() {
+    if (gameState !== "playing") startGame();
+  }
+
+  // ── Game flow ─────────────────────────────────────────────
+  function startGame() {
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+    else if (!audioCtx) getAudio();
+    resetGame();
+    gameState = "playing";
+  }
+
+  // ── Update ────────────────────────────────────────────────
+  function update() {
+    if (gameState !== "playing") return;
+    frameCount++;
+
+    // Player paddle
+    const PLAYER_SPEED = 7;
+    if (mouseY !== null) {
+      playerY = mouseY;
+    } else {
+      if (keyUp)   playerY -= PLAYER_SPEED;
+      if (keyDown) playerY += PLAYER_SPEED;
+    }
+    playerY = Math.max(0, Math.min(H - PADDLE_H, playerY));
+
+    // AI paddle (tracks ball with imperfect reaction)
+    const aiCenter = aiY + PADDLE_H / 2;
+    const diff     = ballY - aiCenter;
+    const aiMove   = Math.sign(diff) * Math.min(Math.abs(diff), AI_SPEED);
+    aiY += aiMove;
+    aiY = Math.max(0, Math.min(H - PADDLE_H, aiY));
+
+    // Trail
+    trail.push({ x: ballX, y: ballY });
+    if (trail.length > 14) trail.shift();
+
+    // Ball movement
+    ballX += ballVX;
+    ballY += ballVY;
+
+    // Top / bottom wall bounce
+    if (ballY - BALL_R < 0) {
+      ballY  = BALL_R;
+      ballVY = Math.abs(ballVY);
+      beep(400, "square", 0.05);
+    }
+    if (ballY + BALL_R > H) {
+      ballY  = H - BALL_R;
+      ballVY = -Math.abs(ballVY);
+      beep(400, "square", 0.05);
+    }
+
+    // Player paddle hit (left side)
+    const pRight = PADDLE_W + 14;
+    if (
+      frameCount > lastPaddleHit + 5 &&
+      ballX - BALL_R < pRight &&
+      ballX + BALL_R > 14 &&
+      ballY + BALL_R > playerY &&
+      ballY - BALL_R < playerY + PADDLE_H
+    ) {
+      ballX = pRight + BALL_R;
