@@ -436,3 +436,151 @@ function drawPipe(p) {
   ctx.fillStyle = "rgba(255,255,255,0.12)";
   ctx.fillRect(p.x + 6, p.bottomY + capH, 8, H);
 }
+
+function drawBird() {
+  const x  = BIRD_X;
+  const y  = birdY;
+  const r  = BIRD_SIZE / 2;
+  const vy = birdVY;
+
+  // Tilt based on velocity (clamp to ±40°)
+  const tilt = Math.max(-0.7, Math.min(0.7, vy * 0.055));
+
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(tilt);
+
+  // Shadow glow
+  ctx.shadowColor  = gravitySign === 1 ? "rgba(249,202,36,0.7)" : "rgba(255,107,107,0.7)";
+  ctx.shadowBlur   = 18;
+
+  // Body
+  ctx.fillStyle = "#f9ca24";
+  ctx.beginPath();
+  ctx.ellipse(0, 0, r, r * 0.85, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+
+  // Wing (animated flap)
+  const wingFlap = Math.sin(frameCount * 0.25) * 4;
+  ctx.fillStyle = "#f39c12";
+  ctx.beginPath();
+  ctx.ellipse(-4, wingFlap, r * 0.62, r * 0.3, -0.35, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Belly
+  ctx.fillStyle = "#ffeaa7";
+  ctx.beginPath();
+  ctx.ellipse(3, 3, r * 0.5, r * 0.4, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Eye white
+  ctx.fillStyle = "#fff";
+  ctx.beginPath();
+  ctx.arc(r * 0.38, -r * 0.22, r * 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Pupil
+  ctx.fillStyle = "#2d3436";
+  ctx.beginPath();
+  ctx.arc(r * 0.45, -r * 0.18, r * 0.16, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Beak
+  ctx.fillStyle = "#e17055";
+  ctx.beginPath();
+  ctx.moveTo(r * 0.72, -r * 0.05);
+  ctx.lineTo(r + 6,     r * 0.12);
+  ctx.lineTo(r * 0.72,  r * 0.24);
+  ctx.closePath();
+  ctx.fill();
+
+  // Crown (gravity flip indicator)
+  if (gravitySign === -1) {
+    ctx.fillStyle = "#a29bfe";
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.arc(i * r * 0.35, -r - 4 + Math.abs(i) * 3, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.restore();
+}
+
+function drawParticles() {
+  for (const p of particles) {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.alpha);
+    ctx.fillStyle   = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur  = 8;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, Math.max(0, p.r), 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawGroundFloor() {
+  // Draw a subtle ground/ceiling line as visual boundary reference
+  const lineColor = "rgba(255,255,255,0.06)";
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth   = 1;
+  ctx.setLineDash([6, 8]);
+  ctx.beginPath(); ctx.moveTo(0, 2);  ctx.lineTo(W, 2);  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, H - 2); ctx.lineTo(W, H - 2); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+// ── Idle animation for start/dead screens ─────────────────
+let idleBirdY  = H / 2;
+let idleBirdVY = 0;
+
+function updateIdleBird() {
+  idleBirdVY += 0.18;
+  idleBirdY  += idleBirdVY;
+  if (idleBirdY > H / 2 + 15) { idleBirdY = H / 2 + 15; idleBirdVY = -2.8; }
+  if (idleBirdY < H / 2 - 15) { idleBirdY = H / 2 - 15; idleBirdVY =  2.8; }
+}
+
+// ── Main loop ────────────────────────────────────────────
+let flappyAnimId = null;
+
+function loop() {
+  frameCount++;
+  ctx.clearRect(0, 0, W, H);
+
+  drawBackground();
+
+  // Pipes
+  for (const p of pipes) drawPipe(p);
+
+  // Particles
+  drawParticles();
+
+  // Bird
+  if (state === "playing" || state === "dead") {
+    drawBird();
+  } else {
+    // Idle float on start / between games
+    updateIdleBird();
+    const savedY = birdY;
+    birdY = idleBirdY;
+    drawBird();
+    birdY = savedY;
+  }
+
+  drawGroundFloor();
+
+  // Game logic
+  update();
+
+  flappyAnimId = requestAnimationFrame(loop);
+}
+
+// ── Bootstrap (deferred — called by arcade hub launchGame) ──
+// showStartScreen(), updateGravityIndicator(), and loop() are
+// invoked externally from index.html so the game only starts
+// when the user picks it from the hub.
