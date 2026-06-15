@@ -144,3 +144,149 @@ function showDeadScreen() {
   overlayScore.textContent = `Score: ${score}`;
   overlayBest.textContent  = `Best: ${bestScore}`;
   overlayHint.textContent  = "Press SPACE or tap to play again";
+  overlay.classList.remove("hidden");
+}
+
+function updateGravityIndicator() {
+  if (gravitySign === 1) {
+    gravityIndicatorEl.textContent = "⬇ NORMAL";
+    gravityIndicatorEl.className   = "normal";
+  } else {
+    gravityIndicatorEl.textContent = "⬆ FLIPPED";
+    gravityIndicatorEl.className   = "inverted";
+  }
+}
+
+function updateScore() {
+  scoreEl.textContent = `Score: ${score}`;
+}
+
+// ── Input handling ────────────────────────────────────────
+function handleFlap() {
+  if (state === "start" || state === "dead") {
+    startGame();
+    return;
+  }
+  if (state !== "playing") return;
+
+  // Apply flap in current gravity direction
+  birdVY = gravitySign === 1 ? FLAP_FORCE_NORMAL : FLAP_FORCE_INVERTED;
+  playFahh();
+  spawnFlapParticles();
+}
+
+function handleGravityToggle() {
+  if (state !== "playing") return;
+  gravitySign *= -1;
+  birdVY *= 0.4; // dampen velocity on toggle for fairness
+  updateGravityIndicator();
+  playFahh(gravitySign === 1 ? 180 : 340, "sawtooth");
+  spawnGravityParticles();
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space" || e.code === "ArrowUp") {
+    e.preventDefault();
+    handleFlap();
+  }
+  if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
+    e.preventDefault();
+    handleGravityToggle();
+  }
+});
+
+canvas.addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  handleFlap();
+});
+
+// ── Pipe spawning ─────────────────────────────────────────
+function spawnPipe() {
+  const minTop = 50;
+  const maxTop = H - PIPE_GAP - 50;
+  const topH   = Math.random() * (maxTop - minTop) + minTop;
+  pipes.push({
+    x      : W + PIPE_WIDTH,
+    topH   : topH,
+    bottomY: topH + PIPE_GAP,
+    scored : false,
+  });
+}
+
+// ── Particle helpers ──────────────────────────────────────
+function spawnFlapParticles() {
+  for (let i = 0; i < 6; i++) {
+    particles.push({
+      x    : BIRD_X,
+      y    : birdY,
+      vx   : -Math.random() * 2.5 - 0.5,
+      vy   : (Math.random() - 0.5) * 2.5,
+      alpha: 1,
+      color: gravitySign === 1 ? "#f9ca24" : "#ff6b6b",
+      r    : Math.random() * 4 + 2,
+    });
+  }
+}
+
+function spawnGravityParticles() {
+  for (let i = 0; i < 14; i++) {
+    const angle = (Math.PI * 2 * i) / 14;
+    particles.push({
+      x    : BIRD_X,
+      y    : birdY,
+      vx   : Math.cos(angle) * (Math.random() * 3 + 1),
+      vy   : Math.sin(angle) * (Math.random() * 3 + 1),
+      alpha: 1,
+      color: gravitySign === 1 ? "#4ecca3" : "#a29bfe",
+      r    : Math.random() * 5 + 2,
+    });
+  }
+}
+
+function spawnScoreParticles() {
+  for (let i = 0; i < 20; i++) {
+    particles.push({
+      x    : W / 2,
+      y    : H / 2,
+      vx   : (Math.random() - 0.5) * 6,
+      vy   : (Math.random() - 0.5) * 6,
+      alpha: 1,
+      color: `hsl(${Math.random() * 60 + 30}, 100%, 65%)`,
+      r    : Math.random() * 5 + 2,
+    });
+  }
+}
+
+// ── Collision detection ───────────────────────────────────
+function birdCollidesWithPipe(p) {
+  const birdRadius = BIRD_SIZE / 2 - 3; // slight forgiveness
+  const birdLeft   = BIRD_X - birdRadius;
+  const birdRight  = BIRD_X + birdRadius;
+  const birdTop    = birdY - birdRadius;
+  const birdBottom = birdY + birdRadius;
+
+  const pipeRight = p.x + PIPE_WIDTH;
+  const pipeLeft  = p.x;
+
+  if (birdRight < pipeLeft || birdLeft > pipeRight) return false;
+
+  // Check top pipe
+  if (birdTop < p.topH) return true;
+  // Check bottom pipe
+  if (birdBottom > p.bottomY) return true;
+
+  return false;
+}
+
+// ── Update ────────────────────────────────────────────────
+function update() {
+  if (state !== "playing") return;
+
+  frameCount++;
+
+  // Physics
+  const grav = gravitySign * (Math.abs(GRAVITY_NORMAL));
+  birdVY    += grav;
+  birdVY     = Math.max(-14, Math.min(14, birdVY)); // terminal velocity clamp
+  birdY     += birdVY;
+
