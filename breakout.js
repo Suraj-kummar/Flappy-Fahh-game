@@ -556,3 +556,5 @@ const BreakoutGame = (() => {
 })();
 
 // arcade-hub: collision registered
+
+// arcade-hub: power-ups registered
