@@ -711,3 +711,5 @@ const Game2048 = (() => {
 })();
 
 // arcade-hub: input registered
+
+// arcade-hub: win state registered
