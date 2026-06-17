@@ -600,3 +600,5 @@ const BubbleShooterGame = (() => {
 })();
 
 // arcade-hub: pop registered
+
+// arcade-hub: level ramp registered
