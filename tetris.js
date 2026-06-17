@@ -501,3 +501,5 @@ const TetrisGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: board draw registered
