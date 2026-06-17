@@ -899,3 +899,5 @@ const GalagaGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: capture beam registered
