@@ -8,7 +8,7 @@
 
 bro it started as one angry chicken.  
 now it's a **whole arcade**.  
-four games. one vibe. zero chill.
+**28 games. one vibe. zero chill.**
 
 welcome to **Fahh Arcade** — a retro neon mini-game hub built from scratch with pure HTML, Canvas and Web Audio.  
 no frameworks. no libraries. no sanity.
@@ -17,7 +17,7 @@ no frameworks. no libraries. no sanity.
 
 ## 🕹️ the games
 
-### 🐔 Flappy Fahh *(the OG)*
+### 🐔 1. Flappy Fahh *(the OG)*
 a chicken that goes **FAHH**.  
 dodge pipes. flip gravity. collect power-ups.  
 achieve greatness. immediately lose it.
@@ -40,9 +40,28 @@ achieve greatness. immediately lose it.
 
 ---
 
-### 🏓 Pong
-the classic. you vs AI.  
-neon paddles, glowing ball, dashed centre line.  
+### 🐍 2. Snake
+eat, grow, don't bite yourself. classic.
+
+---
+
+### 🧱 3. Tetris
+clear lines before the stack reaches the top!
+
+---
+
+### 🏏 4. Breakout
+smash all bricks with your paddle and ball!
+
+---
+
+### 👾 5. Space Invaders
+shoot the alien fleet before they reach you!
+
+---
+
+### 🏓 6. Pong
+you vs AI. neon paddles, glowing ball, dashed centre line.  
 first to 7 wins. good luck with that.
 
 | control | action |
@@ -56,7 +75,67 @@ first to 7 wins. good luck with that.
 
 ---
 
-### 🃏 Memory Match
+### 🔢 7. 2048
+slide tiles, merge numbers, reach 2048!
+
+---
+
+### 💣 8. Minesweeper
+clear the field without triggering a mine!
+
+---
+
+### 🔴 9. Simon Says
+watch the pattern, repeat it. don't miss!
+
+---
+
+### 🧩 10. 15-Puzzle
+slide tiles into order in fewest moves!
+
+---
+
+### ☄️ 11. Asteroids
+thrust, rotate, shoot rocks — survive!
+
+---
+
+### ⌨️ 12. Type Rush
+type falling words before they hit the ground!
+
+---
+
+### 🌊 13. Color Flood
+flood-fill the board in one color to win!
+
+---
+
+### ⚡ 14. Reaction
+click the instant it turns green. how fast are you?
+
+---
+
+### 🃏 15. Blackjack
+beat the dealer to 21 without going bust!
+
+---
+
+### 🎲 16. Dice Poker
+yahtzee-style dice — roll for combos!
+
+---
+
+### 🎯 17. Target Shoot
+tap shrinking targets before they vanish!
+
+---
+
+### 🏃 18. Runner
+jump and duck through infinite obstacles!
+
+---
+
+### 🃏 19. Memory Match
 flip cards. find pairs. try to remember where stuff is.  
 emoji slot-machine vibes. classic nostalgia.
 
@@ -69,7 +148,7 @@ emoji slot-machine vibes. classic nostalgia.
 
 ---
 
-### 🔨 Whack-a-Mole
+### 🔨 20. Whack-a-Mole
 moles pop up. you whack them. that's it.  
 golden moles give bonus points.  
 miss too many and it's over.
@@ -81,6 +160,46 @@ miss too many and it's over.
 - 60-second countdown
 - Floating score popups on whack
 - Lives system + HUD
+
+---
+
+### 🟡 21. Pac-Man
+chomp dots, dodge ghosts, eat power pellets!
+
+---
+
+### 🐸 22. Crossy Road
+hop across roads and rivers without dying!
+
+---
+
+### 🫧 23. Bubble Shooter
+aim and pop 3+ matching colored bubbles!
+
+---
+
+### 🔴 24. Connect Four
+drop discs, get 4 in a row before the AI!
+
+---
+
+### 🎸 25. Rhythm Tap
+hit the falling notes to the beat — A S D F!
+
+---
+
+### 🟩 26. Wordle
+guess the 5-letter word in 6 tries!
+
+---
+
+### 🐲 27. Galaga
+blast alien formations in classic arcade style!
+
+---
+
+### ⛳ 28. Mini Golf
+drag to aim, release to putt — 9 holes!
 
 ---
 
@@ -99,9 +218,33 @@ just raw HTML and a chicken with anger issues.
 | `index.html` | arcade hub — nav, game cards, modals, HUD |
 | `arcade.css` | shared retro neon styles — starfield, cards, modals |
 | `game.js` | Flappy Fahh — full ultra edition |
+| `snake.js` | Snake — classic grow-and-don't-die |
+| `tetris.js` | Tetris — line-clearing madness |
+| `breakout.js` | Breakout — brick smasher |
+| `spaceinvaders.js` | Space Invaders — alien blaster |
 | `pong.js` | Pong — single-player vs AI |
+| `game2048.js` | 2048 — tile merger |
+| `minesweeper.js` | Minesweeper — don't hit the mines |
+| `simon.js` | Simon Says — memory pattern game |
+| `slidingpuzzle.js` | 15-Puzzle — tile slider |
+| `asteroids.js` | Asteroids — rock shooter |
+| `typingspeed.js` | Type Rush — falling word typer |
+| `colorflood.js` | Color Flood — board flood-fill |
+| `reactiontime.js` | Reaction Time — click-speed tester |
+| `blackjack.js` | Blackjack — beat the dealer |
+| `dicepoker.js` | Dice Poker — yahtzee combos |
+| `targetshooter.js` | Target Shoot — shrinking target clicker |
+| `endlessrunner.js` | Runner — infinite obstacle jumper |
 | `memory.js` | Memory Match — emoji card flip |
 | `whackamole.js` | Whack-a-Mole — canvas mole smasher |
+| `pacman.js` | Pac-Man — dot chomper |
+| `crossyroad.js` | Crossy Road — frogger-style hopper |
+| `bubbleshooter.js` | Bubble Shooter — pop matching bubbles |
+| `connectfour.js` | Connect Four — 4-in-a-row vs AI |
+| `rhythmtap.js` | Rhythm Tap — music note hitter |
+| `wordle.js` | Wordle — 5-letter word guesser |
+| `galaga.js` | Galaga — formation shooter |
+| `minigolf.js` | Mini Golf — 9-hole putt-putt |
 | `fahh.mp3` | the sacred FAHH sound |
 
 ---
@@ -132,7 +275,7 @@ it REALLY goes FAHH.
 
 > built with pure HTML + Canvas + Web Audio — no libraries, no frameworks, just vibes and Stack Overflow 😭  
 >  
-> **~2 500 lines of JavaScript across 4 games**  
+> **~10 000+ lines of JavaScript across 28 games**  
 > **1 angry chicken**  
 > **0 regrets**  
 >  
