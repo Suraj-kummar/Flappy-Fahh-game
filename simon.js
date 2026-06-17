@@ -628,3 +628,5 @@ const SimonGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: audio tones registered
