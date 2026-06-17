@@ -353,3 +353,5 @@ const PacManGame = (() => {
 })();
 
 // arcade-hub: ghost AI registered
+
+// arcade-hub: fruit bonus registered
