@@ -709,3 +709,5 @@ const Game2048 = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: input registered
