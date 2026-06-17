@@ -636,3 +636,5 @@ const ColorFloodGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: win logic registered
