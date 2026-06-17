@@ -380,3 +380,5 @@ const SnakeGame = (() => {
 // arcade-hub: draw registered
 
 // arcade-hub: input registered
+
+// arcade-hub: collision registered
