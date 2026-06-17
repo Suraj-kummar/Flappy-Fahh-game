@@ -376,3 +376,5 @@ const SnakeGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: draw registered
