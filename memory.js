@@ -443,3 +443,5 @@ const MemoryGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: difficulty registered
