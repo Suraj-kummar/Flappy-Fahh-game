@@ -861,3 +861,5 @@ const AsteroidsGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: asteroid split registered
