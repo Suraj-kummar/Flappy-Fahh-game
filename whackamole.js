@@ -966,3 +966,5 @@ const WhackAMoleGame = (() => {
   return { init, destroy };
 
 })();
+
+// arcade-hub: golden mole registered
