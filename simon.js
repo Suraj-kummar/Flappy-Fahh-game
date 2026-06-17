@@ -630,3 +630,5 @@ const SimonGame = (() => {
 })();
 
 // arcade-hub: audio tones registered
+
+// arcade-hub: level ramp registered
