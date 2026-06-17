@@ -333,3 +333,5 @@ const EndlessRunnerGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: duck registered
