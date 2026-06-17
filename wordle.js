@@ -889,3 +889,5 @@ const WordleGame = (() => {
 })();
 
 // arcade-hub: keyboard registered
+
+// arcade-hub: share registered
