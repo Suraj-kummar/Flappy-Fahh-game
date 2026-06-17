@@ -404,8 +404,10 @@ const MemoryGame = (() => {
   }
 
   // ── Public API ────────────────────────────────────────────
-  function init(canvasEl) {
-    canvas = canvasEl;
+  function init(canvasElOrId) {
+    canvas = typeof canvasElOrId === 'string'
+      ? document.getElementById(canvasElOrId)
+      : canvasElOrId;
     ctx    = canvas.getContext("2d");
     W = canvas.width;
     H = canvas.height;
@@ -430,9 +432,10 @@ const MemoryGame = (() => {
   }
 
   function destroy() {
-    if (animId) cancelAnimationFrame(animId);
+    cancelAnimationFrame(animId);
     animId = null;
     if (lockTimer) { clearTimeout(lockTimer); lockTimer = null; }
+    if (audioCtx) { audioCtx.close(); audioCtx = null; }
     if (!canvas) return;
     canvas.removeEventListener("click",      onClick);
     canvas.removeEventListener("touchstart", onTouch);
