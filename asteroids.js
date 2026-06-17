@@ -863,3 +863,5 @@ const AsteroidsGame = (() => {
 })();
 
 // arcade-hub: asteroid split registered
+
+// arcade-hub: UFO registered
