@@ -351,3 +351,5 @@ const PacManGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: ghost AI registered
