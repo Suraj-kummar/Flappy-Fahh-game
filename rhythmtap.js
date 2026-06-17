@@ -764,3 +764,5 @@ const RhythmTapGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: scoring registered
