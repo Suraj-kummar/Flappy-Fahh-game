@@ -584,3 +584,4 @@ function loop() {
 // showStartScreen(), updateGravityIndicator(), and loop() are
 // invoked externally from index.html so the game only starts
 // when the user picks it from the hub.
+// Fahh Arcade v2.0 - 28 games, zero regrets
