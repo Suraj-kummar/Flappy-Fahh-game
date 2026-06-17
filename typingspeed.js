@@ -665,3 +665,5 @@ const TypingSpeedGame = (() => {
 
   return { init, destroy };
 })();
+
+// arcade-hub: WPM tracker registered
