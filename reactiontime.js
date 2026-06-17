@@ -582,3 +582,5 @@ const ReactionTimeGame = (() => {
 
   return { init: init, destroy: destroy };
 })();
+
+// arcade-hub: leaderboard registered
